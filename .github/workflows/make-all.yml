@@ -8,12 +8,22 @@ on:
 
 jobs:
   make-all:
-    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: {group: Public-local, labels: [self-hosted, Linux, X64]}
     defaults:
       run:
+        shell: bash
         working-directory: elixir
 
+    container: ubuntu:24.04
     steps:
+      - name: Prepare Ubuntu container tools
+        working-directory: ${{ github.workspace }}
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends sudo ca-certificates curl git git-lfs jq unzip xz-utils python3 python3-venv python3-pip build-essential pkg-config libssl-dev libncurses-dev file wget gnupg
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
